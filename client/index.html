@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>Vue Crud Application</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    <script src="main.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="table-wrapper">
+                <div class="table-title">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h2>Manage <b>Employees</b></h2>
+                        </div>
+                        <div class="col-sm-6">
+                            <a href="#" class="btn btn-success" data-toggle="modal" @click="addEmployeeModal=true"><i class="material-icons">&#xE147;</i> <span>Add New Employee</span></a>
+                            <!-- <a href="#" class="btn btn-danger" data-toggle="modal" @click="deleteEmployeeModal=true"><i class="material-icons">&#xE15C;</i> <span>Delete</span></a> -->
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <!-- <th>
+                                <span class="custom-checkbox">
+                  <input type="checkbox" id="selectAll">
+                  <label for="selectAll"></label>
+                                </span>
+                            </th> -->
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Address</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="users in usersList">
+                            <!-- <td>
+                                <span class="custom-checkbox">
+                  <input type="checkbox" id="checkbox1" name="options[]" value="1">
+                  <label for="checkbox1"></label>
+                </span>
+                            </td> -->
+                            <td>{{users.name}}</td>
+                            <td>{{users.email}}</td>
+                            <td>{{users.address}}</td>
+                            <td>{{users.mobile}}</td>
+                            <td>
+                                <a href="#" class="edit" data-toggle="modal" @click="getAUser(users.email);"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
+                                <a href="#" class="delete" data-toggle="modal" @click="deleteEmployeeModal=true; selectUser(users.email);"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- <div class="clearfix">
+                    <div class="hint-text">Showing <b>5</b> out of <b>25</b> entries</div>
+                    <ul class="pagination">
+                        <li class="page-item disabled"><a href="#">Previous</a></li>
+                        <li class="page-item"><a href="#" class="page-link">1</a></li>
+                        <li class="page-item"><a href="#" class="page-link">2</a></li>
+                        <li class="page-item active"><a href="#" class="page-link">3</a></li>
+                        <li class="page-item"><a href="#" class="page-link">4</a></li>
+                        <li class="page-item"><a href="#" class="page-link">5</a></li>
+                        <li class="page-item"><a href="#" class="page-link">Next</a></li>
+                    </ul>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- Add User Modal HTML -->
+        <div id="overlay" v-if="addEmployeeModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Employee</h4>
+                        <button type="button" class="close" aria-hidden="true" @click="addEmployeeModal=false">&times;</button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <form action="#" method="POST">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" class="form-control" required v-model="userAddData.name">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" class="form-control" required v-model="userAddData.email">
+                            </div>
+                            <div class="form-group">
+                                <label>Address</label>
+                                <textarea class="form-control" required v-model="userAddData.address"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="text" class="form-control" required v-model="userAddData.mobile">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" class="btn btn-default" value="Cancel" @click="addEmployeeModal=false">
+                        <input type="submit" class="btn btn-info" value="Save" @click="addNewUser(userAddData);">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit User Modal HTML -->
+        <div id="overlay" v-if="editEmployeeModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Edit Employee</h4>
+                        <button type="button" class="close" aria-hidden="true" @click="editEmployeeModal=false">&times;</button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <form action="#" method="POST">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" class="form-control" required v-model="userData.name">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" class="form-control" required v-model="userData.email">
+                            </div>
+                            <div class="form-group">
+                                <label>Address</label>
+                                <textarea class="form-control" required v-model="userData.address"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="text" class="form-control" required v-model="userData.mobile">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" class="btn btn-default" value="Cancel" @click="editEmployeeModal=false">
+                        <input type="submit" class="btn btn-info" value="Save" @click="updateAUser(userData);">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete User Modal HTML -->
+        <div id="overlay" v-if="deleteEmployeeModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form>
+                        <div class="modal-header">
+                            <h4 class="modal-title">Delete Employee</h4>
+                            <button type="button" class="close" aria-hidden="true" @click="deleteEmployeeModal=false">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete this Record?</p>
+                            <p class="text-warning"><small>This action cannot be undone.</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="button" class="btn btn-default" value="Cancel" @click="deleteEmployeeModal=false">
+                            <input type="submit" class="btn btn-danger" value="Delete" @click="deleteAUser();">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
